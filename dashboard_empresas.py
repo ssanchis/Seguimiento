@@ -7,6 +7,7 @@ import smtplib
 import schedule
 import time
 import threading
+from datetime import datetime, timedelta
 
 st.set_page_config(page_title="Dashboard Empresas", layout="wide")
 
@@ -50,22 +51,78 @@ def enviar_alerta(mensaje):
     except Exception as e:
         print(f"Error al enviar correo: {e}")
 
-# Función para chequear alertas
+
 def check_alertas(data):
     alertas = []
+    hoy = datetime.now()
+
     for ticker, hist in data.items():
+        # Asegurar que 'Date' esté en datetime y es el índice
+        if 'Date' in hist.columns:
+            hist.set_index('Date', inplace=True)
+        hist.index = pd.to_datetime(hist.index)
+
         precio_actual = hist["Close"].iloc[-1]
+
+        # Histórico total
         max_historico = hist["High"].max()
         min_historico = hist["Low"].min()
+
+        # Último año
+        hace_un_anyo = hoy - timedelta(days=365)
+        hist_1y = hist.loc[hace_un_anyo:]
+        if not hist_1y.empty:
+            max_1y = hist_1y["High"].max()
+            min_1y = hist_1y["Low"].min()
+        else:
+            max_1y = min_1y = None
+
+        # Últimos 2 años
+        hace_dos_anyos = hoy - timedelta(days=730)
+        hist_2y = hist.loc[hace_dos_anyos:]
+        if not hist_2y.empty:
+            max_2y = hist_2y["High"].max()
+            min_2y = hist_2y["Low"].min()
+        else:
+            max_2y = min_2y = None
+
+        # ----------- ALERTAS -----------
+
+        # Histórico
         if precio_actual >= max_historico * ALERTA_UMBRAL:
             mensaje = f"🔔 {ticker} está cerca de su MÁXIMO histórico ({precio_actual:.2f} vs {max_historico:.2f})"
             alertas.append(mensaje)
             enviar_alerta(mensaje)
+
         if precio_actual <= min_historico * (2 - ALERTA_UMBRAL):
             mensaje = f"🔔 {ticker} está cerca de su MÍNIMO histórico ({precio_actual:.2f} vs {min_historico:.2f})"
             alertas.append(mensaje)
             enviar_alerta(mensaje)
+
+        # Último año
+        if max_1y and precio_actual >= max_1y * ALERTA_UMBRAL:
+            mensaje = f"📈 {ticker} está cerca de su MÁXIMO de 1 año ({precio_actual:.2f} vs {max_1y:.2f})"
+            alertas.append(mensaje)
+            enviar_alerta(mensaje)
+
+        if min_1y and precio_actual <= min_1y * (2 - ALERTA_UMBRAL):
+            mensaje = f"📉 {ticker} está cerca de su MÍNIMO de 1 año ({precio_actual:.2f} vs {min_1y:.2f})"
+            alertas.append(mensaje)
+            enviar_alerta(mensaje)
+
+        # Últimos 2 años
+        if max_2y and precio_actual >= max_2y * ALERTA_UMBRAL:
+            mensaje = f"📈 {ticker} está cerca de su MÁXIMO de 2 años ({precio_actual:.2f} vs {max_2y:.2f})"
+            alertas.append(mensaje)
+            enviar_alerta(mensaje)
+
+        if min_2y and precio_actual <= min_2y * (2 - ALERTA_UMBRAL):
+            mensaje = f"📉 {ticker} está cerca de su MÍNIMO de 2 años ({precio_actual:.2f} vs {min_2y:.2f})"
+            alertas.append(mensaje)
+            enviar_alerta(mensaje)
+
     return alertas
+
 
 # Sistema de contraseña
 password = st.text_input("🔒 Introduce la contraseña para acceder:", type="password")
