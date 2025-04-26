@@ -14,7 +14,7 @@ st.set_page_config(page_title="Dashboard Empresas", layout="wide")
 # ------------------------------------------
 # CONFIGURACIÓN
 PASSWORD = "soyrica"  # Cambia aquí tu contraseña
-TICKERS = ["AAPL", "MSFT","GOOGL","META","AMZN","REP.MC"]  # Empresas que quieres seguir
+TICKERS = ["AAPL", "MSFT","JNJ","REP.MC", "PG", "KO","O","CVX","TTE"]  # Empresas que quieres seguir
 ALERTA_UMBRAL = 0.98  # 98% del máximo o 102% del mínimo
 EMAIL_ALERTA = "ssanchiscasco@gmail.com"  # Cambia aquí tu correo para recibir alertas
 EMAIL_CONTRASENA = "ssanchis105567"  # Tu contraseña de correo
@@ -136,12 +136,16 @@ st.title("📊 Seguimiento de Empresas")
 data = descargar_datos()
 
 NOMBRES_EMPRESAS = {
-    "REP.MC": "Repsol",
-    "MSFT": "Microsoft Corporation",
-    "AAPL": "Apple Inc.",
-    "GOOG": "Alphabet Inc. (Google)",
-    "AMZN": "Amazon",
-    "META": "Meta (Facebook)"
+    "REP.MC": "Repsol - 6-7%",
+    "MSFT": "Microsoft Corporation - 0.7%",
+    "AAPL": "Apple Inc. - 0.5%",
+    "JNJ":"Johnson & Johnson - 3.3%",
+    "PG": "Procter & Gamble - 2.5%",
+    "KO":"Coca-Cola - 3.1%",
+    "O":"Realty Income - 5.7% mensual ",
+    "CVX":"Chevron - 4.2%",
+    "TTE":"TotalEnergies - 5%"
+
 }
 
 # Una pestaña por empresa
