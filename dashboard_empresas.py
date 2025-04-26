@@ -13,7 +13,7 @@ st.set_page_config(page_title="Dashboard Empresas", layout="wide")
 # ------------------------------------------
 # CONFIGURACIÓN
 PASSWORD = "soyrica"  # Cambia aquí tu contraseña
-TICKERS = ["AAPL", "MSFT", "GOOGL"]  # Empresas que quieres seguir
+TICKERS = ["AAPL", "MSFT", "GOOGL",'REP.MC']  # Empresas que quieres seguir
 ALERTA_UMBRAL = 0.98  # 98% del máximo o 102% del mínimo
 EMAIL_ALERTA = "ssanchiscasco@gmail.com"  # Cambia aquí tu correo para recibir alertas
 EMAIL_CONTRASENA = "ssanchis105567"  # Tu contraseña de correo
@@ -70,12 +70,20 @@ st.title("📊 Seguimiento de Empresas")
 
 data = descargar_datos()
 
+NOMBRES_EMPRESAS = {
+    "REP.MC": "Repsol",
+    "MSFT": "Microsoft Corporation",
+    "AAPL": "Apple Inc.",
+    "GOOG": "Alphabet Inc. (Google)"
+}
+
 # Una pestaña por empresa
 tabs = st.tabs([f"🏢 {ticker}" for ticker in TICKERS])
 
 for i, ticker in enumerate(TICKERS):
+    nombre_empresa = NOMBRES_EMPRESAS.get(ticker, ticker)  # Si no está, usa el ticker
     with tabs[i]:
-        st.subheader(f"Datos de {ticker}")
+        st.title(nombre_empresa)
 
         hist = data[ticker]
         # Si el índice NO es datetime, arreglamos:
