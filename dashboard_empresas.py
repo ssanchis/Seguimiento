@@ -79,7 +79,7 @@ NOMBRES_EMPRESAS = {
 
 # Una pestaña por empresa
 tabs = st.tabs([f"🏢 {ticker}" for ticker in TICKERS])
-
+print(data)
 for i, ticker in enumerate(TICKERS):
     nombre_empresa = NOMBRES_EMPRESAS.get(ticker, ticker)  # Si no está, usa el ticker
     with tabs[i]:
@@ -91,7 +91,7 @@ for i, ticker in enumerate(TICKERS):
             hist.reset_index(inplace=True)   # Pasa la fecha a columna
             hist.set_index('Date', inplace=True) 
 
-
+        print(ticker)
        # Calculamos fechas de corte
         fecha_max = hist.index.max()
         fecha_corte_2y = fecha_max - pd.DateOffset(years=2)
