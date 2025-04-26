@@ -78,7 +78,12 @@ for i, ticker in enumerate(TICKERS):
         st.subheader(f"Datos de {ticker}")
 
         hist = data[ticker]
-        hist.index = pd.to_datetime(hist.index)
+        # Si el índice NO es datetime, arreglamos:
+        if not isinstance(hist.index, pd.DatetimeIndex):
+            hist.reset_index(inplace=True)   # Pasa la fecha a columna
+            hist.set_index('Date', inplace=True) 
+
+        print(hist.index)
 
        # Calculamos fechas de corte
         fecha_max = hist.index.max()
