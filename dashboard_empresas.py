@@ -24,10 +24,18 @@ EMAIL_CONTRASENA = "ssanchis105567"  # Tu contraseña de correo
 def descargar_datos():
     data = {}
     for ticker in TICKERS:
-        stock = yf.Ticker(ticker)
-        hist = stock.history(period="max").reset_index()  # <--- Fíjate que hacemos reset_index aquí
-        hist["Date"] = pd.to_datetime(hist["Date"])        # <--- Aseguramos que 'Date' es datetime
-        data[ticker] = hist
+        try:
+            stock = yf.Ticker(ticker)
+            hist = stock.history(period="max")
+            if hist.empty:
+                print(f"⚠️ Datos vacíos para {ticker}")
+                continue
+            hist = hist.reset_index()  # Pasa 'Date' a columna
+            hist["Date"] = pd.to_datetime(hist["Date"])  # Asegura tipo datetime
+            data[ticker] = hist
+        except Exception as e:
+            print(f"❌ Error descargando {ticker}: {e}")
+            continue
     return data
 
 # Función para enviar alerta por correo
