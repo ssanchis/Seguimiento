@@ -91,12 +91,12 @@ for i, ticker in enumerate(TICKERS):
         min_historico = hist["Low"].min()
 
         # KPIs 2 últimos años
-        hist_2y = hist[hist.index > (pd.Timestamp.now() - pd.DateOffset(years=2))]
+        hist_2y = hist[hist["Date"]  > (pd.Timestamp.now() - pd.DateOffset(years=2))]
         max_2y = hist_2y["High"].max()
         min_2y = hist_2y["Low"].min()
 
         # KPIs último año
-        hist_1y = hist[hist.index > (pd.Timestamp.now() - pd.DateOffset(years=1))]
+        hist_1y = hist[hist["Date"]  > (pd.Timestamp.now() - pd.DateOffset(years=1))]
         max_1y = hist_1y["High"].max()
         min_1y = hist_1y["Low"].min()
 
