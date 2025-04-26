@@ -91,16 +91,6 @@ for i, ticker in enumerate(TICKERS):
         max_historico = hist["High"].max()
         min_historico = hist["Low"].min()
 
-        # KPIs 2 últimos años
-        hist_2y = hist[hist["Date"]  > (pd.Timestamp.now() - pd.DateOffset(years=2))]
-        max_2y = hist_2y["High"].max()
-        min_2y = hist_2y["Low"].min()
-
-        # KPIs último año
-        hist_1y = hist[hist["Date"]  > (pd.Timestamp.now() - pd.DateOffset(years=1))]
-        max_1y = hist_1y["High"].max()
-        min_1y = hist_1y["Low"].min()
-
         # Fila 1: Histórico completo
         st.markdown("### 📜 Histórico completo")
         col1, col2, col3 = st.columns(3)
@@ -108,14 +98,24 @@ for i, ticker in enumerate(TICKERS):
         col2.metric("📉 Mínimo histórico", f"${min_historico:.2f}")
         col3.metric("💵 Precio actual", f"${precio_actual:.2f}")
 
-        # Fila 2: Últimos 2 años
+        # KPIs 2 últimos años
         st.markdown("### 📅 Últimos 2 años")
+        hist_2y = hist[hist["Date"]  > (pd.Timestamp.now() - pd.DateOffset(years=2))]
+        max_2y = hist_2y["High"].max()
+        min_2y = hist_2y["Low"].min()
+
+        # Fila 2: Últimos 2 años
         col4, col5 = st.columns(2)
         col4.metric("📈 Máximo 2 años", f"${max_2y:.2f}")
         col5.metric("📉 Mínimo 2 años", f"${min_2y:.2f}")
 
         # Fila 3: Último año
         st.markdown("### 📆 Último año")
+        # KPIs último año
+        hist_1y = hist[hist["Date"]  > (pd.Timestamp.now() - pd.DateOffset(years=1))]
+        max_1y = hist_1y["High"].max()
+        min_1y = hist_1y["Low"].min()
+
         col6, col7 = st.columns(2)
         col6.metric("📈 Máximo 1 año", f"${max_1y:.2f}")
         col7.metric("📉 Mínimo 1 año", f"${min_1y:.2f}")
