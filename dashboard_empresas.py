@@ -130,6 +130,7 @@ if password != PASSWORD:
     st.warning("Contraseña incorrecta o falta de contraseña.")
     st.stop()
 
+
 # Dashboard principal
 st.title("📊 Seguimiento de Empresas")
 
