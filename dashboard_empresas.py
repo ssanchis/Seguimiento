@@ -8,14 +8,15 @@ import schedule
 import time
 import threading
 
+st.set_page_config(page_title="Dashboard Empresas", layout="wide")
 
 # ------------------------------------------
 # CONFIGURACIÓN
-PASSWORD = "miclave123"  # Cambia aquí tu contraseña
+PASSWORD = "soyrica"  # Cambia aquí tu contraseña
 TICKERS = ["AAPL", "MSFT", "GOOGL"]  # Empresas que quieres seguir
 ALERTA_UMBRAL = 0.98  # 98% del máximo o 102% del mínimo
-EMAIL_ALERTA = "tucorreo@gmail.com"  # Cambia aquí tu correo para recibir alertas
-EMAIL_CONTRASENA = "tucontrasenaemail"  # Tu contraseña de correo
+EMAIL_ALERTA = "ssanchiscasco@gmail.com"  # Cambia aquí tu correo para recibir alertas
+EMAIL_CONTRASENA = "ssanchis105567"  # Tu contraseña de correo
 # ------------------------------------------
 
 # Función para descargar datos
@@ -24,7 +25,7 @@ def descargar_datos():
     data = {}
     for ticker in TICKERS:
         stock = yf.Ticker(ticker)
-        hist = stock.history(period="1y")
+        hist = stock.history(period="max")
         data[ticker] = hist
     return data
 
@@ -64,31 +65,29 @@ if password != PASSWORD:
     st.stop()
 
 # Dashboard principal
-st.title("📊 Dashboard Empresas")
+st.title("📊 Seguimiento de Empresas")
 
 data = descargar_datos()
 
-tab1, tab2, tab3 = st.tabs(["📈 Precios", "📏 Máximos/Mínimos", "🚨 Alertas"])
+# Una pestaña por empresa
+tabs = st.tabs([f"🏢 {ticker}" for ticker in TICKERS])
 
-with tab1:
-    st.header("Precios actuales")
-    for ticker in TICKERS:
-        st.subheader(ticker)
-        st.line_chart(data[ticker]["Close"])
+for i, ticker in enumerate(TICKERS):
+    with tabs[i]:
+        st.subheader(f"Datos de {ticker}")
 
-with tab2:
-    st.header("Máximos y mínimos históricos")
-    for ticker in TICKERS:
-        st.subheader(ticker)
-        st.metric(label=f"{ticker} - Máximo", value=f"${data[ticker]['High'].max():.2f}")
-        st.metric(label=f"{ticker} - Mínimo", value=f"${data[ticker]['Low'].min():.2f}")
+        hist = data[ticker]
+        precio_actual = hist["Close"].iloc[-1]
+        max_historico = hist["High"].max()
+        min_historico = hist["Low"].min()
 
-with tab3:
-    st.header("Alertas activas")
-    alertas_activas = check_alertas(data)
-    if alertas_activas:
-        for alerta in alertas_activas:
-            st.error(alerta)
-    else:
-        st.success("Sin alertas activas 🚀")
+        # KPIs en fila
+        col1, col2, col3 = st.columns(3)
+        col1.metric("📈 Máximo histórico", f"${max_historico:.2f}")
+        col2.metric("📉 Mínimo histórico", f"${min_historico:.2f}")
+        col3.metric("💵 Precio actual", f"${precio_actual:.2f}")
+
+        # Gráfico histórico debajo
+        st.markdown("### 📊 Evolución histórica del precio")
+        st.line_chart(hist["Close"])
 
