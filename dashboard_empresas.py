@@ -13,7 +13,7 @@ st.set_page_config(page_title="Dashboard Empresas", layout="wide")
 # ------------------------------------------
 # CONFIGURACIÓN
 PASSWORD = "soyrica"  # Cambia aquí tu contraseña
-TICKERS = ["AAPL", "MSFT", "META"]  # Empresas que quieres seguir
+TICKERS = ["AAPL", "MSFT","GOOGL","META","AMZN","REP.MC"]  # Empresas que quieres seguir
 ALERTA_UMBRAL = 0.98  # 98% del máximo o 102% del mínimo
 EMAIL_ALERTA = "ssanchiscasco@gmail.com"  # Cambia aquí tu correo para recibir alertas
 EMAIL_CONTRASENA = "ssanchis105567"  # Tu contraseña de correo
@@ -92,7 +92,7 @@ for i, ticker in enumerate(TICKERS):
         if not isinstance(hist.index, pd.DatetimeIndex):
             hist.reset_index(inplace=True)   # Pasa la fecha a columna
             hist.set_index('Date', inplace=True) 
-
+        print(ticker,hist)
        # Calculamos fechas de corte
         fecha_max = hist.index.max()
         fecha_corte_2y = fecha_max - pd.DateOffset(years=2)
