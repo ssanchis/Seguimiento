@@ -72,22 +72,48 @@ data = descargar_datos()
 # Una pestaña por empresa
 tabs = st.tabs([f"🏢 {ticker}" for ticker in TICKERS])
 
+
 for i, ticker in enumerate(TICKERS):
     with tabs[i]:
         st.subheader(f"Datos de {ticker}")
 
         hist = data[ticker]
+
+        # KPIs generales (histórico completo)
         precio_actual = hist["Close"].iloc[-1]
         max_historico = hist["High"].max()
         min_historico = hist["Low"].min()
 
-        # KPIs en fila
+        # Fila 1: Histórico completo
+        st.markdown("### 📜 Histórico completo")
         col1, col2, col3 = st.columns(3)
         col1.metric("📈 Máximo histórico", f"${max_historico:.2f}")
         col2.metric("📉 Mínimo histórico", f"${min_historico:.2f}")
         col3.metric("💵 Precio actual", f"${precio_actual:.2f}")
 
-        # Gráfico histórico debajo
+        # KPIs 2 últimos años
+        hist_2y = hist[hist.index > (pd.Timestamp.now() - pd.DateOffset(years=2))]
+        max_2y = hist_2y["High"].max()
+        min_2y = hist_2y["Low"].min()
+
+        # Fila 2: Últimos 2 años
+        st.markdown("### 📅 Últimos 2 años")
+        col4, col5 = st.columns(2)
+        col4.metric("📈 Máximo 2 años", f"${max_2y:.2f}")
+        col5.metric("📉 Mínimo 2 años", f"${min_2y:.2f}")
+
+        # KPIs último año
+        hist_1y = hist[hist.index > (pd.Timestamp.now() - pd.DateOffset(years=1))]
+        max_1y = hist_1y["High"].max()
+        min_1y = hist_1y["Low"].min()
+
+        # Fila 3: Último año
+        st.markdown("### 📆 Último año")
+        col6, col7 = st.columns(2)
+        col6.metric("📈 Máximo 1 año", f"${max_1y:.2f}")
+        col7.metric("📉 Mínimo 1 año", f"${min_1y:.2f}")
+
+        # Gráfico histórico general
         st.markdown("### 📊 Evolución histórica del precio")
         st.line_chart(hist["Close"])
 
