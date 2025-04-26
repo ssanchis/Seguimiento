@@ -114,12 +114,20 @@ for i, ticker in enumerate(TICKERS):
         col2.metric("📉 Mínimo histórico", f"${min_historico:.2f}")
         col3.metric("💵 Precio actual", f"${precio_actual:.2f}")
 
+        # Gráfico histórico general
+        st.markdown("### 📊 Evolución histórica del precio")
+        st.line_chart(hist["Close"])
+
         # Fila 2: Últimos 2 años
         st.markdown("### 📅 Últimos 2 años")
         col4, col5,col6 = st.columns(3)
         col4.metric("📈 Máximo 2 años", f"${max_2y:.2f}")
         col5.metric("📉 Mínimo 2 años", f"${min_2y:.2f}")
         col6.metric("💵 Precio actual", f"${precio_actual:.2f}")
+
+        # Gráfico ultimos 2 años
+        st.markdown("### 📊 Evolución últimos 2 años del precio")
+        st.line_chart(hist_2y["Close"])
 
         # Fila 3: Último año
         st.markdown("### 📆 Último año")
@@ -128,7 +136,8 @@ for i, ticker in enumerate(TICKERS):
         col8.metric("📉 Mínimo 1 año", f"${min_1y:.2f}")
         col9.metric("💵 Precio actual", f"${precio_actual:.2f}")
 
-        # Gráfico histórico general
-        st.markdown("### 📊 Evolución histórica del precio")
-        st.line_chart(hist["Close"])
+        # Gráfico ultimo años
+        st.markdown("### 📊 Evolución último año del precio")
+        st.line_chart(hist_1y["Close"])
+
 
