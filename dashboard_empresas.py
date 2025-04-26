@@ -13,7 +13,7 @@ st.set_page_config(page_title="Dashboard Empresas", layout="wide")
 # ------------------------------------------
 # CONFIGURACIÓN
 PASSWORD = "soyrica"  # Cambia aquí tu contraseña
-TICKERS = ["AAPL", "MSFT", "AMZN"]  # Empresas que quieres seguir
+TICKERS = ["AAPL", "MSFT", "GOOGL"]  # Empresas que quieres seguir
 ALERTA_UMBRAL = 0.98  # 98% del máximo o 102% del mínimo
 EMAIL_ALERTA = "ssanchiscasco@gmail.com"  # Cambia aquí tu correo para recibir alertas
 EMAIL_CONTRASENA = "ssanchis105567"  # Tu contraseña de correo
