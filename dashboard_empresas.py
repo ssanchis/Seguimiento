@@ -25,7 +25,8 @@ def descargar_datos():
     data = {}
     for ticker in TICKERS:
         stock = yf.Ticker(ticker)
-        hist = stock.history(period="max")
+        hist = stock.history(period="max").reset_index()  # <--- Fíjate que hacemos reset_index aquí
+        hist["Date"] = pd.to_datetime(hist["Date"])        # <--- Aseguramos que 'Date' es datetime
         data[ticker] = hist
     return data
 
