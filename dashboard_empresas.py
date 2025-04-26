@@ -76,8 +76,14 @@ for i, ticker in enumerate(TICKERS):
     with tabs[i]:
         st.subheader(f"Datos de {ticker}")
 
-        hist = data[ticker]
-        hist.index = pd.to_datetime(hist.index)
+        hist = data[ticker].copy()
+
+        # 🔥 Asegurarse que hay una columna 'Date'
+        if not isinstance(hist.index, pd.DatetimeIndex):
+            hist.index = pd.to_datetime(hist.index)
+
+        # Creamos una columna explícita para trabajar
+        hist["Date"] = hist.index
 
         # KPIs generales (histórico completo)
         precio_actual = hist["Close"].iloc[-1]
