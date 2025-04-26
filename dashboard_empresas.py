@@ -13,7 +13,7 @@ st.set_page_config(page_title="Dashboard Empresas", layout="wide")
 # ------------------------------------------
 # CONFIGURACIÓN
 PASSWORD = "soyrica"  # Cambia aquí tu contraseña
-TICKERS = ["AAPL", "MSFT", "REP.MC","GOOGL"]  # Empresas que quieres seguir
+TICKERS = ["AAPL", "MSFT", "GOOGL","AMZN"]  # Empresas que quieres seguir
 ALERTA_UMBRAL = 0.98  # 98% del máximo o 102% del mínimo
 EMAIL_ALERTA = "ssanchiscasco@gmail.com"  # Cambia aquí tu correo para recibir alertas
 EMAIL_CONTRASENA = "ssanchis105567"  # Tu contraseña de correo
@@ -74,7 +74,8 @@ NOMBRES_EMPRESAS = {
     "REP.MC": "Repsol",
     "MSFT": "Microsoft Corporation",
     "AAPL": "Apple Inc.",
-    "GOOG": "Alphabet Inc. (Google)"
+    "GOOG": "Alphabet Inc. (Google)",
+    "AMZN": "Amazon"
 }
 
 # Una pestaña por empresa
