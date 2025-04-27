@@ -8,6 +8,19 @@ import schedule
 import time
 import threading
 from datetime import datetime, timedelta
+import streamlit as st
+from streamlit_autorefresh import st_autorefresh
+from email.mime.text import MIMEText
+
+# Refrescar cada 1 hora (3600s)
+st_autorefresh(interval=3600 * 1000, key="refresh")
+
+# Mostrar hora de última actualización
+hora_actual = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+proxima_actualizacion = (datetime.now() + timedelta(hours=1)).strftime("%Y-%m-%d %H:%M:%S")
+
+st.sidebar.markdown(f"🕑 **Última actualización:** {hora_actual}")
+st.sidebar.markdown(f"🔜 **Próxima actualización:** {proxima_actualizacion}")
 
 st.set_page_config(page_title="Dashboard Empresas", layout="wide")
 
@@ -17,7 +30,7 @@ PASSWORD = "soyrica"  # Cambia aquí tu contraseña
 TICKERS = ["AAPL", "MSFT","JNJ","REP.MC", "PG", "KO","O","CVX","TTE"]  # Empresas que quieres seguir
 ALERTA_UMBRAL = 0.98  # 98% del máximo o 102% del mínimo
 EMAIL_ALERTA = "ssanchiscasco@gmail.com"  # Cambia aquí tu correo para recibir alertas
-EMAIL_CONTRASENA = "ssanchis105567"  # Tu contraseña de correo
+EMAIL_CONTRASENA = "icxn wgnh dmfx ztim"  # Tu contraseña de correo
 # ------------------------------------------
 
 # Función para descargar datos
@@ -64,49 +77,63 @@ def descargar_datos():
 # Función para enviar alerta por correo
 def enviar_alerta(mensaje):
     try:
-        server = smtplib.SMTP('smtp.gmail.com', 587)
-        server.starttls()
-        server.login(EMAIL_ALERTA, EMAIL_CONTRASENA)
-        server.sendmail(EMAIL_ALERTA, EMAIL_ALERTA, mensaje)
-        server.quit()
-        print(f"Correo enviado: {mensaje}")
+        mensaje = str(mensaje)  # Asegura que es string
+
+        # Muy importante: charset utf-8 para soportar emojis
+        msg = MIMEText(mensaje, _charset="utf-8")
+        msg["Subject"] = "🔔 Alerta de Mercado"
+        msg["From"] = EMAIL_ALERTA
+        msg["To"] = EMAIL_ALERTA
+
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+            server.login(EMAIL_ALERTA, EMAIL_CONTRASENA)
+            server.send_message(msg)
+        print(f"✅ Correo enviado correctamente: {mensaje}")
     except Exception as e:
         print(f"Error al enviar correo: {e}")
 
 
-def check_alertas(data):
+def check_alertas(datos_historicos, datos_recientes):
     alertas = []
     hoy = datetime.now()
 
-    for ticker, hist in data.items():
-        # Asegurar que 'Date' esté en datetime y es el índice
+    for ticker in datos_historicos.keys():
+        hist = datos_historicos[ticker]
+        reciente = datos_recientes[ticker]
+
+        # Aseguramos que 'Date' sea índice
         if 'Date' in hist.columns:
             hist.set_index('Date', inplace=True)
-        hist.index = pd.to_datetime(hist.index)
+        if 'Date' in reciente.columns:
+            reciente.set_index('Date', inplace=True)
 
-        precio_actual = hist["Close"].iloc[-1]
+        hist.index = pd.to_datetime(hist.index).tz_localize(None)      # <<< AÑADIDO
+        reciente.index = pd.to_datetime(reciente.index).tz_localize(None)  # <<< AÑADIDO
 
-        # Histórico total
+
+        precio_actual = reciente["Close"].iloc[-1]
+
+        # Histórico completo (diario)
         max_historico = hist["High"].max()
         min_historico = hist["Low"].min()
 
-        # Último año
-        hace_un_anyo = hoy - timedelta(days=365)
-        hist_1y = hist.loc[hace_un_anyo:]
-        if not hist_1y.empty:
-            max_1y = hist_1y["High"].max()
-            min_1y = hist_1y["Low"].min()
-        else:
-            max_1y = min_1y = None
-
-        # Últimos 2 años
-        hace_dos_anyos = hoy - timedelta(days=730)
-        hist_2y = hist.loc[hace_dos_anyos:]
-        if not hist_2y.empty:
-            max_2y = hist_2y["High"].max()
-            min_2y = hist_2y["Low"].min()
+        # Últimos 2 años (datos 1h)
+        fecha_corte_2y = hoy - timedelta(days=730)
+        reciente_2y = reciente.loc[reciente.index >= fecha_corte_2y]
+        if not reciente_2y.empty:
+            max_2y = reciente_2y["High"].max()
+            min_2y = reciente_2y["Low"].min()
         else:
             max_2y = min_2y = None
+
+        # Último año (datos 1h)
+        fecha_corte_1y = hoy - timedelta(days=365)
+        reciente_1y = reciente.loc[reciente.index >= fecha_corte_1y]
+        if not reciente_1y.empty:
+            max_1y = reciente_1y["High"].max()
+            min_1y = reciente_1y["Low"].min()
+        else:
+            max_1y = min_1y = None
 
         # ----------- ALERTAS -----------
 
@@ -144,6 +171,7 @@ def check_alertas(data):
             enviar_alerta(mensaje)
 
     return alertas
+
 
 
 # Sistema de contraseña
@@ -244,5 +272,7 @@ for i, ticker in enumerate(TICKERS):
         # Gráfico último año
         st.markdown("### 📊 Evolución último año del precio (1h)")
         st.line_chart(reciente_1y["Close"])
+        print(reciente_1y)
 
+alertas = check_alertas(data_historico,data_reciente)
 

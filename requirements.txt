@@ -2,3 +2,4 @@ streamlit
 yfinance
 pandas
 schedule
+streamlit_autorefresh
