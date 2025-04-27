@@ -11,17 +11,21 @@ from datetime import datetime, timedelta
 import streamlit as st
 from streamlit_autorefresh import st_autorefresh
 from email.mime.text import MIMEText
+from zoneinfo import ZoneInfo
 
 st.set_page_config(page_title="Dashboard Empresas", layout="wide")
 # Refrescar cada 1 hora (3600s)
 st_autorefresh(interval=3600 * 1000, key="refresh")
 
-# Mostrar hora de última actualización
-hora_actual = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-proxima_actualizacion = (datetime.now() + timedelta(hours=1)).strftime("%Y-%m-%d %H:%M:%S")
+zona_madrid = ZoneInfo("Europe/Madrid")
 
-st.sidebar.markdown(f"🕑 **Última actualización:** {hora_actual}")
-st.sidebar.markdown(f"🔜 **Próxima actualización:** {proxima_actualizacion}")
+# Hora actual en Madrid
+hora_actual = datetime.now(tz=zona_madrid)
+proxima_actualizacion = hora_actual + timedelta(hours=1)
+
+# Mostrar formateado
+st.sidebar.markdown(f"🕑 **Última actualización:** {hora_actual.strftime('%Y-%m-%d %H:%M:%S')}")
+st.sidebar.markdown(f"🔜 **Próxima actualización:** {proxima_actualizacion.strftime('%Y-%m-%d %H:%M:%S')}")
 
 # ------------------------------------------
 # CONFIGURACIÓN
