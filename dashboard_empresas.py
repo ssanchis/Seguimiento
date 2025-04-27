@@ -190,7 +190,7 @@ st.title("📊 Seguimiento de Empresas")
 data_historico, data_reciente = descargar_datos()
 
 NOMBRES_EMPRESAS = {
-    "REP.MC": "Repsol - 6-7%",
+    "REP.MC": "Repsol - 6~7%",
     "MSFT": "Microsoft Corporation - 0.7%",
     "AAPL": "Apple Inc. - 0.5%",
     "JNJ":"Johnson & Johnson - 3.3%",
