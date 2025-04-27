@@ -21,30 +21,45 @@ EMAIL_CONTRASENA = "ssanchis105567"  # Tu contraseña de correo
 # ------------------------------------------
 
 # Función para descargar datos
-@st.cache_data(ttl=43200)  # cachea 12h = 43200 segundos
+@st.cache_data(ttl=3600)  # cachea 1h
 def descargar_datos():
-    data = {}
+    data_historico = {}
+    data_reciente = {}
     for ticker in TICKERS:
         try:
             stock = yf.Ticker(ticker)
-            hist = stock.history(period="730d", interval="1h")
-            if hist.empty:
-                print(f"⚠️ Datos vacíos para {ticker}")
-                continue
-            hist = hist.reset_index()  # Pasa 'Date' a columna
-            # Arreglamos columna de fecha
-            if 'Datetime' in hist.columns:
-                hist.rename(columns={'Datetime': 'Date'}, inplace=True)
-            elif 'Date' not in hist.columns:
-                print(f"⚠️ No se encuentra 'Date' en {ticker}, usando índice como 'Date'.")
-                hist['Date'] = hist.index
 
-            hist["Date"] = pd.to_datetime(hist["Date"])  # Asegura tipo datetime
-            data[ticker] = hist
+            # Datos históricos (diarios)
+            hist_diario = stock.history(period="max", interval="1d")
+            if hist_diario.empty:
+                print(f"⚠️ Histórico vacío para {ticker}")
+            else:
+                hist_diario = hist_diario.reset_index()
+                if 'Date' not in hist_diario.columns and 'Datetime' in hist_diario.columns:
+                    hist_diario.rename(columns={'Datetime': 'Date'}, inplace=True)
+                elif 'Date' not in hist_diario.columns:
+                    hist_diario['Date'] = hist_diario.index
+                hist_diario["Date"] = pd.to_datetime(hist_diario["Date"])
+                data_historico[ticker] = hist_diario
+
+            # Datos recientes (1 hora)
+            hist_reciente = stock.history(period="2y", interval="1h")
+            if hist_reciente.empty:
+                print(f"⚠️ Recientes vacíos para {ticker}")
+            else:
+                hist_reciente = hist_reciente.reset_index()
+                if 'Date' not in hist_reciente.columns and 'Datetime' in hist_reciente.columns:
+                    hist_reciente.rename(columns={'Datetime': 'Date'}, inplace=True)
+                elif 'Date' not in hist_reciente.columns:
+                    hist_reciente['Date'] = hist_reciente.index
+                hist_reciente["Date"] = pd.to_datetime(hist_reciente["Date"])
+                data_reciente[ticker] = hist_reciente
+
         except Exception as e:
             print(f"❌ Error descargando {ticker}: {e}")
             continue
-    return data
+
+    return data_historico, data_reciente
 
 # Función para enviar alerta por correo
 def enviar_alerta(mensaje):
@@ -141,7 +156,7 @@ if password != PASSWORD:
 # Dashboard principal
 st.title("📊 Seguimiento de Empresas")
 
-data = descargar_datos()
+data_historico, data_reciente = descargar_datos()
 
 NOMBRES_EMPRESAS = {
     "REP.MC": "Repsol - 6-7%",
@@ -157,39 +172,45 @@ NOMBRES_EMPRESAS = {
 
 # Una pestaña por empresa
 tabs = st.tabs([f"🏢 {ticker}" for ticker in TICKERS])
-print(data)
+
 for i, ticker in enumerate(TICKERS):
     nombre_empresa = NOMBRES_EMPRESAS.get(ticker, ticker)  # Si no está, usa el ticker
     with tabs[i]:
         st.title(nombre_empresa)
 
-        hist = data[ticker]
-        # Si el índice NO es datetime, arreglamos:
+        hist = data_historico[ticker]
+        reciente = data_reciente[ticker]
+
+        # Aseguramos índices
         if not isinstance(hist.index, pd.DatetimeIndex):
-            hist.reset_index(inplace=True)   # Pasa la fecha a columna
-            hist.set_index('Date', inplace=True) 
-        print(ticker,hist)
-       # Calculamos fechas de corte
-        fecha_max = hist.index.max()
+            hist.reset_index(inplace=True)
+            hist.set_index('Date', inplace=True)
+
+        if not isinstance(reciente.index, pd.DatetimeIndex):
+            reciente.reset_index(inplace=True)
+            reciente.set_index('Date', inplace=True)
+
+        # Calculamos fechas de corte
+        fecha_max = reciente.index.max()
         fecha_corte_2y = fecha_max - pd.DateOffset(years=2)
         fecha_corte_1y = fecha_max - pd.DateOffset(years=1)
 
-        # Filtramos datos
-        hist_2y = hist[hist.index >= fecha_corte_2y]
-        hist_1y = hist[hist.index >= fecha_corte_1y]
+        # Filtramos datos recientes
+        reciente_2y = reciente[reciente.index >= fecha_corte_2y]
+        reciente_1y = reciente[reciente.index >= fecha_corte_1y]
 
         # KPIs históricos
-        precio_actual = hist["Close"].iloc[-1]
+        precio_actual = reciente["Close"].iloc[-1]  # precio actual en reciente
         max_historico = hist["High"].max()
         min_historico = hist["Low"].min()
 
-        # KPIs 2 últimos años
-        max_2y = hist_2y["High"].max()
-        min_2y = hist_2y["Low"].min()
+        # KPIs 2 últimos años (usando datos horarios)
+        max_2y = reciente_2y["High"].max()
+        min_2y = reciente_2y["Low"].min()
 
         # KPIs último año
-        max_1y = hist_1y["High"].max()
-        min_1y = hist_1y["Low"].min()
+        max_1y = reciente_1y["High"].max()
+        min_1y = reciente_1y["Low"].min()
 
         # Fila 1: Histórico completo
         st.markdown("### 📜 Histórico completo")
@@ -204,14 +225,14 @@ for i, ticker in enumerate(TICKERS):
 
         # Fila 2: Últimos 2 años
         st.markdown("### 📅 Últimos 2 años")
-        col4, col5,col6 = st.columns(3)
+        col4, col5, col6 = st.columns(3)
         col4.metric("📈 Máximo 2 años", f"${max_2y:.2f}")
         col5.metric("📉 Mínimo 2 años", f"${min_2y:.2f}")
         col6.metric("💵 Precio actual", f"${precio_actual:.2f}")
 
-        # Gráfico ultimos 2 años
-        st.markdown("### 📊 Evolución últimos 2 años del precio")
-        st.line_chart(hist_2y["Close"])
+        # Gráfico últimos 2 años
+        st.markdown("### 📊 Evolución últimos 2 años del precio (1h)")
+        st.line_chart(reciente_2y["Close"])
 
         # Fila 3: Último año
         st.markdown("### 📆 Último año")
@@ -220,8 +241,8 @@ for i, ticker in enumerate(TICKERS):
         col8.metric("📉 Mínimo 1 año", f"${min_1y:.2f}")
         col9.metric("💵 Precio actual", f"${precio_actual:.2f}")
 
-        # Gráfico ultimo años
-        st.markdown("### 📊 Evolución último año del precio")
-        st.line_chart(hist_1y["Close"])
+        # Gráfico último año
+        st.markdown("### 📊 Evolución último año del precio (1h)")
+        st.line_chart(reciente_1y["Close"])
 
 
