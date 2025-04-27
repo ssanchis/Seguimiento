@@ -27,11 +27,18 @@ def descargar_datos():
     for ticker in TICKERS:
         try:
             stock = yf.Ticker(ticker)
-            hist = stock.history(period="max")
+            hist = stock.history(period="730d", interval="1h")
             if hist.empty:
                 print(f"⚠️ Datos vacíos para {ticker}")
                 continue
             hist = hist.reset_index()  # Pasa 'Date' a columna
+            # Arreglamos columna de fecha
+            if 'Datetime' in hist.columns:
+                hist.rename(columns={'Datetime': 'Date'}, inplace=True)
+            elif 'Date' not in hist.columns:
+                print(f"⚠️ No se encuentra 'Date' en {ticker}, usando índice como 'Date'.")
+                hist['Date'] = hist.index
+
             hist["Date"] = pd.to_datetime(hist["Date"])  # Asegura tipo datetime
             data[ticker] = hist
         except Exception as e:
