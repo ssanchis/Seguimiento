@@ -12,6 +12,7 @@ import streamlit as st
 from streamlit_autorefresh import st_autorefresh
 from email.mime.text import MIMEText
 
+st.set_page_config(page_title="Dashboard Empresas", layout="wide")
 # Refrescar cada 1 hora (3600s)
 st_autorefresh(interval=3600 * 1000, key="refresh")
 
@@ -21,8 +22,6 @@ proxima_actualizacion = (datetime.now() + timedelta(hours=1)).strftime("%Y-%m-%d
 
 st.sidebar.markdown(f"🕑 **Última actualización:** {hora_actual}")
 st.sidebar.markdown(f"🔜 **Próxima actualización:** {proxima_actualizacion}")
-
-st.set_page_config(page_title="Dashboard Empresas", layout="wide")
 
 # ------------------------------------------
 # CONFIGURACIÓN
