@@ -146,7 +146,6 @@ NOMBRES_EMPRESAS = {
     "O":"Realty Income - 5.7% mensual ",
     "CVX":"Chevron - 4.2%",
     "TTE":"TotalEnergies - 5%"
-
 }
 
 # Una pestaña por empresa
