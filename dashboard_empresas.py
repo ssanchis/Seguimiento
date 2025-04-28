@@ -15,7 +15,10 @@ from zoneinfo import ZoneInfo
 
 st.set_page_config(page_title="Dashboard Empresas", layout="wide")
 # Refrescar cada 1 hora (3600s)
-st_autorefresh(interval=3600 * 1000, key="refresh")
+count = st_autorefresh(interval=3600*1000, key="refresh") 
+
+if count > 0:
+    st.cache_data.clear()  
 
 zona_madrid = ZoneInfo("Europe/Madrid")
 
