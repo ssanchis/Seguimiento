@@ -3,6 +3,9 @@
 from alertas_core import descargar_datos, check_alertas
 import time
 import datetime
+import warnings
+
+warnings.filterwarnings("ignore", category=UserWarning, module='urllib3')
 
 def main():
     while True:
