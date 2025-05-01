@@ -68,15 +68,6 @@ for i, ticker in enumerate(TICKERS):
         hist = data_historico[ticker]
         reciente = data_reciente[ticker]
 
-        # Aseguramos índices
-        if not isinstance(hist.index, pd.DatetimeIndex):
-            hist.reset_index(inplace=True)
-            hist.set_index('Date', inplace=True)
-
-        if not isinstance(reciente.index, pd.DatetimeIndex):
-            reciente.reset_index(inplace=True)
-            reciente.set_index('Date', inplace=True)
-
         # Calculamos fechas de corte
         fecha_max = reciente.index.max()
         fecha_corte_2y = fecha_max - pd.DateOffset(years=2)

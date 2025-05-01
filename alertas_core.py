@@ -15,17 +15,37 @@ EMAIL_CONTRASENA = "icxn wgnh dmfx ztim"
 def descargar_datos():
     data_historico = {}
     data_reciente = {}
+
     for ticker in TICKERS:
         try:
             stock = yf.Ticker(ticker)
 
+            # Histórico diario
             hist = stock.history(period="max", interval="1d").reset_index()
             hist["Date"] = pd.to_datetime(hist["Date"] if "Date" in hist else hist.index)
+            hist.set_index("Date", inplace=True)
             data_historico[ticker] = hist
 
-            reciente = stock.history(period="2y", interval="1h").reset_index()
-            reciente["Date"] = pd.to_datetime(reciente["Date"] if "Date" in reciente else reciente.index)
+            # Reciente horario
+            reciente = stock.history(period="2y", interval="1h")
+
+            # Verifica si el índice es DateTimeIndex (debería serlo)
+            if not isinstance(reciente.index, pd.DatetimeIndex):
+                print(f"⚠️ El índice no es datetime para {ticker}, intentando corregir...")
+
+            # Ahora convertimos el índice a una columna llamada "Date"
+            reciente = reciente.reset_index()
+
+            # Aseguramos que la columna "Datetime" esté bien
+            if "Datetime" in reciente.columns:
+                reciente["Date"] = pd.to_datetime(reciente["Datetime"])
+                reciente.drop(columns=["Datetime"], inplace=True)
+            else:
+                reciente["Date"] = pd.to_datetime(reciente["Date"] if "Date" in reciente else reciente.index)
+
+            reciente.set_index("Date", inplace=True)
             data_reciente[ticker] = reciente
+
         except Exception as e:
             print(f"❌ Error con {ticker}: {e}")
             continue
