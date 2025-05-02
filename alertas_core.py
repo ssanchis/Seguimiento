@@ -20,9 +20,14 @@ def descargar_datos():
         try:
             stock = yf.Ticker(ticker)
 
-            # Histórico diario
-            hist = stock.history(period="max", interval="1d").reset_index()
-            hist["Date"] = pd.to_datetime(hist["Date"] if "Date" in hist else hist.index)
+            # Descargar histórico diario
+            hist = stock.history(period="max", interval="1d")
+
+            if not isinstance(hist.index, pd.DatetimeIndex):
+                hist.index = pd.to_datetime(hist.index)
+
+            hist = hist.reset_index()  # Ahora "Date" es una columna
+            hist["Date"] = pd.to_datetime(hist["Date"])
             hist.set_index("Date", inplace=True)
             data_historico[ticker] = hist
 
@@ -71,12 +76,15 @@ def check_alertas(datos_historicos, datos_recientes):
     hoy = datetime.now()
 
     for ticker in datos_historicos.keys():
-        hist = datos_historicos[ticker].set_index("Date")
-        reciente = datos_recientes[ticker].set_index("Date")
-
+        # Datos históricos
+        hist = datos_historicos[ticker]
         hist.index = pd.to_datetime(hist.index).tz_localize(None)
+
+        # Datos recientes (el índice ya es de tipo Datetime)
+        reciente = datos_recientes[ticker]
         reciente.index = pd.to_datetime(reciente.index).tz_localize(None)
 
+        # Lo que sigue depende de cómo estén estructurados los datos
         precio_actual = reciente["Close"].iloc[-1]
         max_historico = hist["High"].max()
         min_historico = hist["Low"].min()
@@ -107,3 +115,5 @@ def check_alertas(datos_historicos, datos_recientes):
             alerta(f"📉 {ticker} cerca de su MÍNIMO de 2 años ({precio_actual:.2f} vs {min_2y:.2f})")
 
     return alertas
+
+
