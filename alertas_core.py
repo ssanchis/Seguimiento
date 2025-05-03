@@ -8,7 +8,7 @@ from email.mime.text import MIMEText
 
 # CONFIGURACIÓN
 TICKERS = ["AAPL", "MSFT","JNJ","REP.MC", "PG", "KO","O","CVX","TTE"]
-ALERTA_UMBRAL = 0.98
+ALERTA_UMBRAL = 0.95
 EMAIL_ALERTA = "ssanchiscasco@gmail.com"
 EMAIL_CONTRASENA = "icxn wgnh dmfx ztim"
 
